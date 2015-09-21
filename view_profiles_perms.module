@@ -74,3 +74,40 @@ function view_profiles_perms_access($account = NULL) {
   }
   return $access;
 }
+
+/**
+ * Implements hook_entity_info_alter().
+ */
+function view_profiles_perms_entity_info_alter(&$entity_info) {
+  if (module_exists('entity')) {
+    // Override the user access callback if entity.module is installed.
+    $entity_info['user']['access callback'] = 'view_profiles_perms_entity_metadata_user_access';
+  }
+}
+
+/**
+ * Implements hook_module_implements_alter().
+ */
+function view_profiles_perms_module_implements_alter(&$implementations, $hook) {
+  if ($hook == 'entity_info_alter' && isset($implementations['view_profiles_perms'])) {
+    // Make sure entity.module doesn't regain control of user access.
+    $group = $implementations['view_profiles_perms'];
+    unset($implementations['view_profiles_perms']);
+    $implementations['view_profiles_perms'] = $group;
+  }
+}
+
+/**
+ * Access callback to override entity_metadata_user_access().
+ */
+function view_profiles_perms_entity_metadata_user_access($op, $entity = NULL, $account = NULL, $entity_type = NULL) {
+  // First check entity.module's access callback.
+  $access = entity_metadata_user_access($op, $entity, $account, $entity_type);
+
+  if (!$access && $op == 'view') {
+    // Override entity.module if it didn't grant view access already.
+    $access = view_profiles_perms_access($entity);
+  }
+
+  return $access;
+}
