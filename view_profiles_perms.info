@@ -1,4 +1,0 @@
-name = View profiles permissions
-description = Provides permissions to view user profiles based on user roles
-dependencies[] = user
-core = 7.x
