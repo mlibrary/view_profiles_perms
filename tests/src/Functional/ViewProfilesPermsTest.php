@@ -36,6 +36,7 @@ class ViewProfilesPermsTest extends BrowserTestBase {
    * Tests view profiles permissions.
    */
   public function testViewProfilePerms() {
+    $assert = $this->assertSession();
     // Assert the right permissions appear in the UI.
     $admin = $this->drupalCreateUser([], NULL, TRUE);
     $this->drupalLogin($admin);
@@ -43,12 +44,17 @@ class ViewProfilesPermsTest extends BrowserTestBase {
     $this->assertText('View profiles permissions');
     $this->assertText("Access Manager profiles");
     $this->assertText("Access Developer profiles");
+    $assert->checkboxChecked('developer[access manager profiles]');
+    $assert->checkboxNotChecked('anonymous[access user profiles]');
+    $assert->checkboxNotChecked('authenticated[access user profiles]');
 
     // Create a user with each role.
     $developer = $this->drupalCreateUser();
     $developer->addRole('developer');
+    $developer->save();
     $manager = $this->drupalCreateUser();
     $manager->addRole('manager');
+    $manager->save();
 
     // Assert Developers can access Managers profiles.
     $this->drupalLogin($developer);
@@ -58,5 +64,15 @@ class ViewProfilesPermsTest extends BrowserTestBase {
     $this->drupalLogin($manager);
     $this->drupalGet('user/' . $developer->id());
     $this->assertResponse(403, "Managers can't access Developers's profiles");
+
+    // Assert that the global 'access user profiles' permission overrides our
+    // permissions.
+    $this->drupalLogin($admin);
+    $this->drupalPostForm('admin/people/permissions', ['authenticated[access user profiles]' => TRUE], 'Save permissions');
+    $assert->checkboxChecked('authenticated[access user profiles]');
+    // Managers shoudl now be able to access Develoepers profiles.
+    $this->drupalLogin($manager);
+    $this->drupalGet('user/' . $developer->id());
+    $this->assertResponse(200, "Managers can access Developers's profiles");
   }
 }
