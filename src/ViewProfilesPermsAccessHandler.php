@@ -2,6 +2,7 @@
 
 namespace Drupal\view_profiles_perms;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\user\UserAccessControlHandler;
@@ -25,7 +26,10 @@ class ViewProfilesPermsAccessHandler extends UserAccessControlHandler {
     // @see \Drupal\user\UserAccessControlHandler::checkAccess()
     if ($operation == 'view' && $entity->isActive() && ($account->id() !== $entity->id())) {
       foreach ($entity->getRoles(TRUE) as $role) {
-        return $access->allowedIfHasPermission($account, "access $role profiles");
+        $result = AccessResult::allowedIfHasPermission($account, "access $role profiles");
+        if ($result->isAllowed()) {
+          return $result;
+        }
       }
     }
     return $access;

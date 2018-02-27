@@ -65,6 +65,15 @@ class ViewProfilesPermsTest extends BrowserTestBase {
     $this->drupalGet('user/' . $developer->id());
     $this->assertResponse(403, "Managers can't access Developers's profiles");
 
+    // Assert users with more than one role, and only one with access.
+    $user = $this->drupalCreateUser();
+    $user->addRole('developer');
+    $user->addRole('manager');
+    $user->save();
+    $this->drupalLogin($developer);
+    $this->drupalGet('user/' . $user->id());
+    $this->assertResponse(200, "Developer can acces another user with both roles");
+
     // Assert that the global 'access user profiles' permission overrides our
     // permissions.
     $this->drupalLogin($admin);
