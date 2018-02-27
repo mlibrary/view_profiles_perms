@@ -2,5 +2,12 @@
 
 /**
  * @file
- * Restricts viewing user profiles based on user roles
+ * Restricts viewing user profiles based on user roles.
  */
+
+/**
+ * Implements hook_entity_type_alter().
+ */
+function view_profiles_perms_entity_type_alter(array &$entity_types) {
+  $entity_types['user']->setHandlerClass('access', 'Drupal\view_profiles_perms\ViewProfilesPermsAccessHandler');
+}
