@@ -3,9 +3,7 @@
 namespace Drupal\Tests\view_profiles_perms\Functional;
 
 use Drupal\Tests\BrowserTestBase;
-use Drupal\user\RoleInterface;
 use  Drupal\Tests\user\Traits\UserCreationTrait;
-use Drupal\user\Entity\Role;
 
 /**
  * Tests the permissions provided by view_profile_perms module.
@@ -26,62 +24,111 @@ class ViewProfilesPermsTest extends BrowserTestBase {
   ];
 
   /**
-   * A user role.
+   * A user with the developer role.
    *
-   * @var \Drupal\user\Entity\Role
+   * @var \Drupal\user\Entity\User
    */
-  protected $role;
+  protected $developer;
+
+  /**
+   * A user with the manager role.
+   *
+   * @var \Drupal\user\Entity\User
+   */
+  protected $manager;
+
+  /**
+   * A user with the administrator role.
+   *
+   * @var \Drupal\user\Entity\User
+   */
+  protected $admin;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
+    parent::setUp();
+
+    $developer = $this->drupalCreateUser();
+    $developer->addRole('developer');
+    $developer->save();
+    $this->developer = $developer;
+
+    $manager = $this->drupalCreateUser();
+    $manager->addRole('manager');
+    $manager->save();
+    $this->manager = $manager;
+
+    $this->admin = $this->drupalCreateUser([], NULL, TRUE);
+  }
 
   /**
    * Tests view profiles permissions.
    */
   public function testViewProfilePerms() {
-    $assert = $this->assertSession();
-    // Assert the right permissions appear in the UI.
-    $admin = $this->drupalCreateUser([], NULL, TRUE);
-    $this->drupalLogin($admin);
+    // Assert that the roles defined by view_profiles_perms_test module get
+    // their permissions generated and appear correctly in the UI.
+    $this->drupalLogin($this->admin);
     $this->drupalGet('admin/people/permissions');
     $this->assertText('View profiles permissions');
-    $this->assertText("Access Manager profiles");
-    $this->assertText("Access Developer profiles");
+    $this->assertText('Access Manager profiles');
+    $this->assertText('Access Developer profiles');
+    $assert = $this->assertSession();
     $assert->checkboxChecked('developer[access manager profiles]');
     $assert->checkboxNotChecked('anonymous[access user profiles]');
     $assert->checkboxNotChecked('authenticated[access user profiles]');
+    // Assert we are not generating permissions for authenticated nor anonymous
+    // roles.
+    $this->assertNoText('Access Authenticated user profiles');
+    $this->assertNoText('Access Anonymous user profiles');
 
-    // Create a user with each role.
-    $developer = $this->drupalCreateUser();
-    $developer->addRole('developer');
-    $developer->save();
-    $manager = $this->drupalCreateUser();
-    $manager->addRole('manager');
-    $manager->save();
+    // Tests for asserting access to profiles based on our permissions.
+    // - Developer role has 'access manager profiles'
+    // - Manager role has no permissions
+    //
+    // By default Drupal only assigns 'access user profiles' to the
+    // administrator role.
 
     // Assert Developers can access Managers profiles.
-    $this->drupalLogin($developer);
-    $this->drupalGet('user/' . $manager->id());
-    $this->assertResponse(200, "Developers can access Manager's profiles");
-    // Assert Managers can't access Develoepers profiles.
-    $this->drupalLogin($manager);
-    $this->drupalGet('user/' . $developer->id());
-    $this->assertResponse(403, "Managers can't access Developers's profiles");
+    $this->drupalLogin($this->developer);
+    $this->drupalGet('user/' . $this->manager->id());
+    $this->assertResponse(200, "Developers can access manager's profiles");
+
+    // Assert Managers can't access developers profiles.
+    $this->drupalLogin($this->manager);
+    $this->drupalGet('user/' . $this->developer->id());
+    $this->assertResponse(403, "Managers can't access developer's profiles");
 
     // Assert users with more than one role, and only one with access.
     $user = $this->drupalCreateUser();
     $user->addRole('developer');
     $user->addRole('manager');
     $user->save();
-    $this->drupalLogin($developer);
+    $this->drupalLogin($this->developer);
     $this->drupalGet('user/' . $user->id());
-    $this->assertResponse(200, "Developer can acces another user with both roles");
+    $this->assertResponse(200, "Developers can access another user with both roles");
 
-    // Assert that the global 'access user profiles' permission overrides our
-    // permissions.
-    $this->drupalLogin($admin);
+    // Assert that the 'access user profiles' permission overrides ours.
+    $this->drupalLogin($this->admin);
     $this->drupalPostForm('admin/people/permissions', ['authenticated[access user profiles]' => TRUE], 'Save permissions');
     $assert->checkboxChecked('authenticated[access user profiles]');
-    // Managers shoudl now be able to access Develoepers profiles.
-    $this->drupalLogin($manager);
-    $this->drupalGet('user/' . $developer->id());
-    $this->assertResponse(200, "Managers can access Developers's profiles");
+    // Managers should now be able to access Developers profiles.
+    $this->drupalLogin($this->manager);
+    $this->drupalGet('user/' . $this->developer->id());
+    $this->assertResponse(200, "Managers can access developer's profiles");
+
+    // Assert any user can visit its own profile page.
+    $this->drupalGet('user/' . $this->manager->id());
+    $this->assertResponse(200, 'Normal authenticated user is able to access its own profile page');
+
+    // An inactive/blocked user's profile should never be affected by our
+    // permissions.
+    $this->drupalLogout();
+    $this->manager->block();
+    $this->manager->save();
+    $this->drupalLogin($this->developer);
+    $this->drupalGet('user/' . $this->manager->id());
+    $this->assertResponse(403, "Developers cannot access a blocked manager's profile");
   }
 }
