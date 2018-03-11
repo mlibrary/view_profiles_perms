@@ -17,7 +17,7 @@ class ViewProfilesPermsAccessHandler extends UserAccessControlHandler {
    */
   protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
     // Parent class allowing access takes precedence.
-    /** @var \Drupal\user\UserInterface $entity*/
+    /* @var $entity \Drupal\user\UserInterface */
     $access = parent::checkAccess($entity, $operation, $account);
     if ($access->isAllowed()) {
       return $access;
@@ -26,9 +26,9 @@ class ViewProfilesPermsAccessHandler extends UserAccessControlHandler {
     // @see \Drupal\user\UserAccessControlHandler::checkAccess()
     if ($operation == 'view' && $entity->isActive() && ($account->id() !== $entity->id())) {
       foreach ($entity->getRoles(TRUE) as $role) {
-        $result = AccessResult::allowedIfHasPermission($account, "access $role profiles");
-        if ($result->isAllowed()) {
-          return $result;
+        $permission_access = AccessResult::allowedIfHasPermission($account, "access $role profiles");
+        if ($permission_access->isAllowed()) {
+          return $permission_access;
         }
       }
     }
