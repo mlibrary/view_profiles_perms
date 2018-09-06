@@ -39,4 +39,5 @@ class ViewProfilesPermsPermissions {
 
     return $permissions;
   }
+
 }

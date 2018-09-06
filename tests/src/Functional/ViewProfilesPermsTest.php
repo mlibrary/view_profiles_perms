@@ -3,7 +3,7 @@
 namespace Drupal\Tests\view_profiles_perms\Functional;
 
 use Drupal\Tests\BrowserTestBase;
-use  Drupal\Tests\user\Traits\UserCreationTrait;
+use Drupal\Tests\user\Traits\UserCreationTrait;
 
 /**
  * Tests the permissions provided by view_profile_perms module.
@@ -91,7 +91,6 @@ class ViewProfilesPermsTest extends BrowserTestBase {
     //
     // By default Drupal only assigns 'access user profiles' to the
     // administrator role.
-
     // Assert Developers can access Managers profiles.
     $this->drupalLogin($this->developer);
     $this->drupalGet('user/' . $this->manager->id());
@@ -133,4 +132,5 @@ class ViewProfilesPermsTest extends BrowserTestBase {
     $this->drupalGet('user/' . $this->manager->id());
     $assert->statusCodeEquals(403);
   }
+
 }
