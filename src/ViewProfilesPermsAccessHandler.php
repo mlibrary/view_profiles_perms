@@ -26,7 +26,7 @@ class ViewProfilesPermsAccessHandler extends UserAccessControlHandler {
     // @see \Drupal\user\UserAccessControlHandler::checkAccess()
     if ($operation == 'view' && $entity->isActive() && ($account->id() !== $entity->id())) {
       foreach ($entity->getRoles(TRUE) as $role) {
-        $permission_access = AccessResult::allowedIfHasPermission($account, "access $role profiles");
+        $permission_access = AccessResult::allowedIfHasPermission($account, "access $role users profiles");
         if ($permission_access->isAllowed()) {
           return $permission_access;
         }

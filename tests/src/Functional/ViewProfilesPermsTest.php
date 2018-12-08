@@ -75,15 +75,15 @@ class ViewProfilesPermsTest extends BrowserTestBase {
     $this->drupalLogin($this->admin);
     $this->drupalGet('admin/people/permissions');
     $assert->pageTextContains('View profiles permissions');
-    $assert->pageTextContains('Access Manager profiles');
-    $assert->pageTextContains('Access Developer profiles');
-    $assert->checkboxChecked('developer[access manager profiles]');
+    $assert->pageTextContains('Access Manager users profiles');
+    $assert->pageTextContains('Access Developer users profiles');
+    $assert->checkboxChecked('developer[access manager users profiles]');
     $assert->checkboxNotChecked('anonymous[access user profiles]');
     $assert->checkboxNotChecked('authenticated[access user profiles]');
     // Assert we are not generating permissions for authenticated nor anonymous
     // roles.
-    $assert->pageTextNotContains('Access Authenticated user profiles');
-    $assert->pageTextNotContains('Access Anonymous user profiles');
+    $assert->pageTextNotContains('Access Authenticated users profiles');
+    $assert->pageTextNotContains('Access Anonymous users profiles');
 
     // Tests for asserting access to profiles based on our permissions.
     // - Developer role has 'access manager profiles'

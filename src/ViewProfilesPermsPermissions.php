@@ -32,8 +32,8 @@ class ViewProfilesPermsPermissions {
     foreach ($roles as $role) {
       $role_name = $role->label();
       $role_id = $role->id();
-      $permissions["access $role_id profiles"] = [
-        'title' => $this->t("Access %role_name profiles", ['%role_name' => $role_name]),
+      $permissions["access $role_id users profiles"] = [
+        'title' => $this->t("Access %role_name users profiles", ['%role_name' => $role_name]),
       ];
     }
 
