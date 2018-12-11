@@ -1,6 +1,6 @@
-name: View profiles permissions
+name: View Profiles Permissions
 description: Provides permissions to view user profiles based on user roles
 type: module
 dependencies:
- - user
+ - drupal:user
 core: 8.x
