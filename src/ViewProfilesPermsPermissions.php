@@ -20,7 +20,7 @@ class ViewProfilesPermsPermissions {
    */
   public function permissions() {
     // Generate permissions for each user role except authenticated and
-    // annonyous.
+    // anonymous.
     $permissions = [];
     /* @var $roles \Drupal\user\RoleInterface[] */
     $roles = user_roles(TRUE);
