@@ -2,6 +2,7 @@ name: View Profiles Perms Test
 type: module
 description: For testing View Profile Perms
 core: 8.x
+core_version_requirement: ^8 || ^9
 package: System
 dependencies:
   - view_profiles_perms

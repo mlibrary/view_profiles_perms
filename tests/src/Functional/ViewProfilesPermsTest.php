@@ -24,6 +24,11 @@ class ViewProfilesPermsTest extends BrowserTestBase {
   ];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * A user with the developer role.
    *
    * @var \Drupal\user\Entity\User
