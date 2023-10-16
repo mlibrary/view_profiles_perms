@@ -19,7 +19,7 @@ class ViewProfilesPermsTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'view_profiles_perms_test',
   ];
 
@@ -52,7 +52,7 @@ class ViewProfilesPermsTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
 
     $developer = $this->drupalCreateUser();
@@ -117,7 +117,8 @@ class ViewProfilesPermsTest extends BrowserTestBase {
 
     // Assert that the 'access user profiles' permission overrides ours.
     $this->drupalLogin($this->admin);
-    $this->drupalPostForm('admin/people/permissions', ['authenticated[access user profiles]' => TRUE], 'Save permissions');
+    $this->drupalGet('admin/people/permissions');
+    $this->submitForm(['authenticated[access user profiles]' => TRUE], 'Save permissions');
     $assert->checkboxChecked('authenticated[access user profiles]');
     // Managers should now be able to access Developers profiles.
     $this->drupalLogin($this->manager);
